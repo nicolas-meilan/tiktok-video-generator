@@ -1,0 +1,44 @@
+{
+  "name": "tiktok-video-generator",
+  "version": "1.0.0",
+  "description": "tiktok video generator",
+  "main": "index.ts",
+  "scripts": {
+    "start": "npm run typescript && DOTENV_CONFIG_PATH=.env && export GOOGLE_APPLICATION_CREDENTIALS=google-credentials.json && node dist/index.js",
+    "typescript": "tsc --project tsconfig.json",
+    "lint": "./node_modules/.bin/eslint ./src --ext .ts",
+    "lint-fixup": "./node_modules/.bin/eslint ./src --ext .ts --fix",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nicolas-meilan/tiktok-video-generator.git"
+  },
+  "keywords": [
+    "video",
+    "creator",
+    "generator"
+  ],
+  "author": "Nicolas Meilan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nicolas-meilan/tiktok-video-generator/issues"
+  },
+  "homepage": "https://github.com/nicolas-meilan/tiktok-video-generator#readme",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.30.6",
+    "@typescript-eslint/parser": "^5.30.6",
+    "eslint": "^8.19.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "jest": "^28.1.2"
+  },
+  "dependencies": {
+    "@google-cloud/text-to-speech": "^4.0.0",
+    "axios": "^0.27.2",
+    "dotenv": "^16.0.1",
+    "get-mp3-duration": "^1.0.0",
+    "typescript": "^4.7.4",
+    "videoshow": "^0.1.12"
+  }
+}

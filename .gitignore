@@ -102,3 +102,9 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Google credentials
+google-credentials.json
+
+# temp files
+tmp
