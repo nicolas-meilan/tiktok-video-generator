@@ -1,10 +1,12 @@
-import axios from 'axios';
 import fs from 'fs';
+
+import axios from 'axios';
 import FormData from 'form-data';
+
 import {
   TiktokUserAuth,
   TiktokStatusQR,
-  TiktokQR
+  TiktokQR,
 } from '../types/tiktok';
 
 const TIKTOK_CLIENT_KEY = process.env.TIKTOK_CLIENT_KEY;
@@ -22,7 +24,7 @@ const VIDEO_URL = 'share/video/';
 
 export const obtainUserTokens = async (userCode: string): Promise<TiktokUserAuth> => {
   const response = await axios.post(
-    `${BASE_URL}${O_AUTH_URL}access_token?client_key=${TIKTOK_CLIENT_KEY}&client_secret=${TIKTOK_CLIENT_SECRET}&code=${userCode}&grant_type=authorization_code`
+    `${BASE_URL}${O_AUTH_URL}access_token?client_key=${TIKTOK_CLIENT_KEY}&client_secret=${TIKTOK_CLIENT_SECRET}&code=${userCode}&grant_type=authorization_code`,
   );
 
   return {
@@ -34,7 +36,7 @@ export const obtainUserTokens = async (userCode: string): Promise<TiktokUserAuth
 
 export const refreshUserToken = async (refreshToken: string): Promise<TiktokUserAuth> => {
   const response = await axios.post(
-    `${BASE_URL}${O_AUTH_URL}refresh_token?client_key=${TIKTOK_CLIENT_KEY}&refresh_token==${refreshToken}&grant_type=refresh_token`
+    `${BASE_URL}${O_AUTH_URL}refresh_token?client_key=${TIKTOK_CLIENT_KEY}&refresh_token==${refreshToken}&grant_type=refresh_token`,
   );
 
   return {
@@ -49,18 +51,18 @@ export const getQR = async (): Promise<TiktokQR> => {
     `${BASE_URL}${QR_URL}get_qrcode?client_key=${TIKTOK_CLIENT_KEY}&scope=video.upload&next=${APP_URL}`,
   );
 
-    return {
-      scanQR: response.data.data.scan_qrcode_url,
-      token: response.data.data.token,
-    }
+  return {
+    scanQR: response.data.data.scan_qrcode_url,
+    token: response.data.data.token,
+  };
 
 };
 
 export const checkQR = async (token: string): Promise<TiktokStatusQR> => {
   const response = await axios.get(
-    `${BASE_URL}${QR_URL}check_qrcode?client_key=${TIKTOK_CLIENT_KEY}&scope=video.upload&next=${APP_URL}&token=${token}`
+    `${BASE_URL}${QR_URL}check_qrcode?client_key=${TIKTOK_CLIENT_KEY}&scope=video.upload&next=${APP_URL}&token=${token}`,
   );
-  
+
   const redirectUrl = response.data.data.redirect_url || '';
 
   const clientCode = redirectUrl.replace(`${APP_URL}?code=`, '').split('&')[0]; // obtain code from url
@@ -70,7 +72,7 @@ export const checkQR = async (token: string): Promise<TiktokStatusQR> => {
     clientTicket: response.data.data.client_ticket,
     status: response.data.data.status,
   };
-}
+};
 
 // Video endpoint
 
@@ -82,7 +84,8 @@ export const uploadVideo = async (accessToken: string, userId: string, videoPath
 
   await axios.post(
     uploadVideoUrl, body, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    }
-  );
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
 };

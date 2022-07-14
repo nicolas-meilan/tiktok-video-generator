@@ -1,4 +1,5 @@
 import axios from 'axios';
+
 import { WikiPage } from '../types/wikipedia';
 
 const WIKIPEDIA_API_URL = 'https://es.wikipedia.org/api/rest_v1/';

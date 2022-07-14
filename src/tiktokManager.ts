@@ -1,18 +1,18 @@
 import qrcode from 'qrcode-terminal';
 
 import { getQR, checkQR, obtainUserTokens, uploadVideo as uploadVideoApi } from './api/tiktok';
-import { TiktokUserAuth } from './types/tiktok';
 import {
   TIKTOK_QR_POLLING_TIME,
   TIKTOK_QR_CONFIRMED,
 } from './constants';
+import { TiktokUserAuth } from './types/tiktok';
 
 export const loginWithQR = async (): Promise<TiktokUserAuth> => {
   const { scanQR, token } = await getQR();
 
   await checkQR(token); // Is needed to initialize the QR code
   qrcode.setErrorLevel('H');
-  qrcode.generate(scanQR, { small: true, });
+  qrcode.generate(scanQR, { small: true });
 
   return new Promise((resolve, reject) => {
     const intervalRef = setInterval(async () => {
@@ -22,7 +22,7 @@ export const loginWithQR = async (): Promise<TiktokUserAuth> => {
           clearInterval(intervalRef);
           const tiktokUserAuth = await obtainUserTokens(qrCheck.clientCode!);
           resolve(tiktokUserAuth);
-        };
+        }
       } catch (error) {
         reject(error);
       }

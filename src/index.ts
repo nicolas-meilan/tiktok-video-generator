@@ -1,8 +1,8 @@
-import 'dotenv/config'
+import 'dotenv/config';
 
 import { getRandomDefinition } from './api/wikipedia';
 import { generateSpeech, generateVideo } from './media';
-import { loginWithQR, uploadVideo} from './tiktokManager';
+import { loginWithQR, uploadVideo } from './tiktokManager';
 import { compactString } from './utils/formatter';
 
 

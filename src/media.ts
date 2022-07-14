@@ -1,7 +1,9 @@
-import googleTextToSpeech, { protos } from '@google-cloud/text-to-speech';
 import fs from 'fs';
-import videoshow from 'videoshow';
+
+import googleTextToSpeech, { protos } from '@google-cloud/text-to-speech';
 import getMP3Duration from 'get-mp3-duration';
+import videoshow from 'videoshow';
+
 import {
   TMP_DIR,
   SPEECH_FILE,
@@ -23,7 +25,7 @@ export const generateSpeech = async (text: string, languageCode: string = DEFAUL
     audioConfig: { audioEncoding: protos.google.cloud.texttospeech.v1.AudioEncoding.MP3 },
   };
 
-  const [ response ] = await ttsClient.synthesizeSpeech(ttsRequest);
+  const [response] = await ttsClient.synthesizeSpeech(ttsRequest);
 
   return response.audioContent! as Uint8Array;
 
@@ -32,20 +34,20 @@ export const generateSpeech = async (text: string, languageCode: string = DEFAUL
 export const generateVideo = ({
   image,
   audio,
-} : {
+}: {
   image?: string;
   audio?: string | Uint8Array;
-} = {}) : Promise<string> => new Promise((res, rej) => {
+} = {}): Promise<string> => new Promise((res, rej) => {
   const videoImage = image || DEFAULT_IMAGE_PATH;
-  const defaultAudioPath = `${TMP_DIR}/${SPEECH_FILE}`
+  const defaultAudioPath = `${TMP_DIR}/${SPEECH_FILE}`;
   const videoAudio = audio || defaultAudioPath;
   const audioIsPath = typeof videoAudio === 'string';
-  const audioBuffer = audioIsPath  ? fs.readFileSync(videoAudio as string) : videoAudio;
+  const audioBuffer = audioIsPath ? fs.readFileSync(videoAudio as string) : videoAudio;
   const audioDuration = Math.ceil(getMP3Duration(audioBuffer) / S_MS_FACTOR);
 
   const options = {
     loop: audioDuration,
-    size: '1080x1920'
+    size: '1080x1920',
   };
 
   if (!fs.existsSync(TMP_DIR)) {
