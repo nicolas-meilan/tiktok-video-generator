@@ -3,7 +3,7 @@ import qrcode from 'qrcode-terminal';
 import { getQR, checkQR, obtainUserTokens, uploadVideo as uploadVideoApi } from './api/tiktok';
 import { TiktokUserAuth } from './types/tiktok';
 import {
-  TIKTOK_QR_POOLING_TIME,
+  TIKTOK_QR_POLLING_TIME,
   TIKTOK_QR_CONFIRMED,
 } from './constants';
 
@@ -26,7 +26,7 @@ export const loginWithQR = async (): Promise<TiktokUserAuth> => {
       } catch (error) {
         reject(error);
       }
-    }, TIKTOK_QR_POOLING_TIME);
+    }, TIKTOK_QR_POLLING_TIME);
   });
 };
 
