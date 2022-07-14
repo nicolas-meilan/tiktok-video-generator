@@ -2,13 +2,15 @@ import googleTextToSpeech, { protos } from '@google-cloud/text-to-speech';
 import fs from 'fs';
 import videoshow from 'videoshow';
 import getMP3Duration from 'get-mp3-duration';
+import {
+  TMP_DIR,
+  SPEECH_FILE,
+  VIDEO_FILE,
+} from './constants';
 
 const DEFAULT_LANGUAGE_CODE = 'es';
 
 const DEFAULT_IMAGE_PATH = './assets/defaultVideoImage.png';
-const TMP_DIR = './tmp';
-const SPEECH_FILE = 'speech.mp3';
-const VIDEO_FILE = 'video.mp4';
 
 const S_MS_FACTOR = 1000;
 
@@ -33,11 +35,11 @@ export const generateVideo = ({
 } : {
   image?: string;
   audio?: string | Uint8Array;
-} = {}) : Promise<void> => new Promise((res, rej) => {
+} = {}) : Promise<string> => new Promise((res, rej) => {
   const videoImage = image || DEFAULT_IMAGE_PATH;
   const defaultAudioPath = `${TMP_DIR}/${SPEECH_FILE}`
   const videoAudio = audio || defaultAudioPath;
-  const audioIsPath = typeof audio === 'string';
+  const audioIsPath = typeof videoAudio === 'string';
   const audioBuffer = audioIsPath  ? fs.readFileSync(videoAudio as string) : videoAudio;
   const audioDuration = Math.ceil(getMP3Duration(audioBuffer) / S_MS_FACTOR);
 
@@ -51,14 +53,16 @@ export const generateVideo = ({
   }
 
   if (audioIsPath) {
-    return videoshow([videoImage], options).audio(videoAudio).save(`${TMP_DIR}/${VIDEO_FILE}`)
+    videoshow([videoImage], options).audio(videoAudio).save(`${TMP_DIR}/${VIDEO_FILE}`)
       .on('end', res)
       .on('error', rej);
+
+    return;
   }
 
   fs.writeFileSync(`${TMP_DIR}/${SPEECH_FILE}`, audio as Uint8Array, 'binary');
 
-  return videoshow([videoImage], options).audio(defaultAudioPath).save(`${TMP_DIR}/${VIDEO_FILE}`)
+  videoshow([videoImage], options).audio(defaultAudioPath).save(`${TMP_DIR}/${VIDEO_FILE}`)
     .on('end', res)
     .on('error', rej);
 });
