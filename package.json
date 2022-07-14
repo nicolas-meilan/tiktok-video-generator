@@ -8,7 +8,8 @@
     "typescript": "tsc --project tsconfig.json",
     "lint": "./node_modules/.bin/eslint ./src --ext .ts",
     "lint-fixup": "./node_modules/.bin/eslint ./src --ext .ts --fix",
-    "test": "jest"
+    "test": "node -e \"console.log('RUN JEST')\"",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -40,6 +41,7 @@
     "dotenv": "^16.0.1",
     "form-data": "^4.0.0",
     "get-mp3-duration": "^1.0.0",
+    "husky": "^8.0.1",
     "qrcode-terminal": "^0.12.0",
     "typescript": "^4.7.4",
     "videoshow": "^0.1.12"
