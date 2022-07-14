@@ -16,10 +16,7 @@
     ],
     "rules": {
         "import/prefer-default-export": "off",
-        "semi": [
-            "error",
-            "always"
-        ],
+        "semi": "off",
         "@typescript-eslint/member-delimiter-style": [
             "error",
             {
@@ -49,6 +46,7 @@
                 },
                 "newlines-between": "always"
             }
-        ]
+        ],
+        "eol-last": ["error", "always"]
     }
 }
