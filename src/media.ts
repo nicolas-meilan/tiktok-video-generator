@@ -1,8 +1,7 @@
 import fs from 'fs';
 
 import googleTextToSpeech, { protos } from '@google-cloud/text-to-speech';
-import getMP3Duration from 'get-mp3-duration';
-import videoshow from 'videoshow';
+import ffmpeg from 'fluent-ffmpeg';
 
 import {
   TMP_DIR,
@@ -10,15 +9,14 @@ import {
   VIDEO_FILE,
 } from './constants';
 
+
 const DEFAULT_LANGUAGE_CODE = 'es';
 
-const DEFAULT_IMAGE_PATH = './assets/defaultVideoImage.png';
-
-const S_MS_FACTOR = 1000;
+const DEFAULT_VIDEO_PATH = './assets/videoBase.mp4';
 
 const ttsClient = new googleTextToSpeech.TextToSpeechClient();
 
-export const generateSpeech = async (text: string, languageCode: string = DEFAULT_LANGUAGE_CODE): Promise<Uint8Array> => {
+export const generateSpeech = async (text: string, languageCode: string = DEFAULT_LANGUAGE_CODE): Promise<string> => {
   const ttsRequest = {
     input: { text },
     voice: { languageCode },
@@ -27,44 +25,52 @@ export const generateSpeech = async (text: string, languageCode: string = DEFAUL
 
   const [response] = await ttsClient.synthesizeSpeech(ttsRequest);
 
-  return response.audioContent! as Uint8Array;
+  const audioFile = `${TMP_DIR}/${SPEECH_FILE}`;
+  fs.writeFileSync(audioFile, response.audioContent! as Uint8Array, 'binary');
 
+  return audioFile;
 };
 
-export const generateVideo = ({
-  image,
-  audio,
-}: {
-  image?: string;
-  audio?: string | Uint8Array;
-} = {}): Promise<string> => new Promise((res, rej) => {
-  const videoImage = image || DEFAULT_IMAGE_PATH;
-  const defaultAudioPath = `${TMP_DIR}/${SPEECH_FILE}`;
-  const videoAudio = audio || defaultAudioPath;
-  const audioIsPath = typeof videoAudio === 'string';
-  const audioBuffer = audioIsPath ? fs.readFileSync(videoAudio as string) : videoAudio;
-  const audioDuration = Math.ceil(getMP3Duration(audioBuffer) / S_MS_FACTOR);
+const getDurationOfMedia = (mediaPath: string): Promise<number> => new Promise((resolve, reject) => {
+  ffmpeg.ffprobe(mediaPath, (err, metadata) => {
+    if (err) {
+      reject(err);
+      return;
+    }
+    resolve(metadata.format.duration || 0);
+  });
+});
 
-  const options = {
-    loop: audioDuration,
-    size: '1080x1920',
-  };
+export const generateVideo = async ({
+  videoPath,
+  audioPath,
+}: {
+  videoPath?: string;
+  audioPath?: string;
+} = {}): Promise<string> => {
+  const videoBase = videoPath || DEFAULT_VIDEO_PATH;
+  const defaultAudioPath = `${TMP_DIR}/${SPEECH_FILE}`;
+  const videoAudio = audioPath || defaultAudioPath;
+
+  const audioDuration = await getDurationOfMedia(videoAudio);
 
   if (!fs.existsSync(TMP_DIR)) {
     fs.mkdirSync(TMP_DIR);
   }
 
-  if (audioIsPath) {
-    videoshow([videoImage], options).audio(videoAudio).save(`${TMP_DIR}/${VIDEO_FILE}`)
-      .on('end', res)
-      .on('error', rej);
+  const outputFile = `${TMP_DIR}/${VIDEO_FILE}`;
+  return new Promise((resolve, reject) => {
+    ffmpeg()
+      .input(videoAudio)
+      .input(videoBase).inputOption(['-stream_loop -1'])
+      .complexFilter([
+        {
+          filter: 'amix', options: { duration: 'first', weights: '1 0' },
+        },
+      ]).size('1080x1920').aspect('9:16').duration(audioDuration)
+      .on('end', () => resolve(outputFile))
+      .on('error', reject)
+      .save(outputFile);
+  });
+};
 
-    return;
-  }
-
-  fs.writeFileSync(`${TMP_DIR}/${SPEECH_FILE}`, audio as Uint8Array, 'binary');
-
-  videoshow([videoImage], options).audio(defaultAudioPath).save(`${TMP_DIR}/${VIDEO_FILE}`)
-    .on('end', res)
-    .on('error', rej);
-});

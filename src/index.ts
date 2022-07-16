@@ -6,7 +6,7 @@ import {
   getUserTokens,
   loginWithQR,
   uploadVideo,
-  logout,
+  // logout,
 } from './tiktokManager';
 import { compactString } from './utils/formatter';
 
@@ -22,15 +22,15 @@ const main = async (): Promise<void> => {
     console.log('Logged in\nSearching random definition from wikipedia...');
     const wikiPage = await getRandomDefinition();
     console.log('Generating audio...');
-    const audio = await generateSpeech(compactString(wikiPage.extract));
+    const audioPath = await generateSpeech(compactString(wikiPage.extract));
     console.log('Generating video...');
-    const videoPath = await generateVideo({ audio });
+    const videoPath = await generateVideo({ audioPath });
     console.log('Uploading video...');
     await uploadVideo(tiktokUserTokens.accessToken, tiktokUserTokens.userId, videoPath);
     console.log('Video uploaded');
   } catch (error) {
     console.error(error);
-    logout(); // TODO logout only when the refresh token fails by specific error.
+    // logout(); // TODO logout only when the refresh token fails by specific error.
   }
 };
 
