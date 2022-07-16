@@ -7,7 +7,6 @@ import {
   TMP_DIR,
   SPEECH_FILE,
   VIDEO_FILE,
-  TIKTOK_RESOLUTION,
   TIKTOK_ASPECT_RATIO,
 } from './constants';
 
@@ -46,10 +45,13 @@ const getDurationOfMedia = (mediaPath: string): Promise<number> => new Promise((
 export const generateVideo = async ({
   videoPath,
   audioPath,
+  imagePath,
 }: {
   videoPath?: string;
   audioPath?: string;
+  imagePath?: string;
 } = {}): Promise<string> => {
+  const overImageHeight = 600;
   const videoBase = videoPath || DEFAULT_VIDEO_PATH;
   const defaultAudioPath = `${TMP_DIR}/${SPEECH_FILE}`;
   const videoAudio = audioPath || defaultAudioPath;
@@ -61,13 +63,35 @@ export const generateVideo = async ({
   }
 
   const outputFile = `${TMP_DIR}/${VIDEO_FILE}`;
+  const complexFilter : ffmpeg.FilterSpecification[] = [{
+    filter: 'amix', options: { duration: 'first', weights: '1 0' },
+  }];
+
   return new Promise((resolve, reject) => {
-    ffmpeg()
+    const videoEdition = ffmpeg()
       .input(videoAudio)
-      .input(videoBase).inputOption(['-stream_loop -1'])
-      .complexFilter({
-        filter: 'amix', options: { duration: 'first', weights: '1 0' },
-      }).size(TIKTOK_RESOLUTION).aspect(TIKTOK_ASPECT_RATIO).duration(audioDuration)
+      .input(videoBase).inputOption(['-stream_loop -1']);
+    if (imagePath) {
+      videoEdition.input(imagePath);
+      complexFilter.push({
+        filter: 'scale',
+        options: {
+          width: 'min(-1, iw)',
+          height: overImageHeight,
+        },
+        outputs: '[over]',
+        inputs: '[2:v]',
+      }, {
+        filter: 'overlay',
+        options: {
+          x: '(main_w-overlay_w)/2',
+          y: 8,
+        },
+        inputs: '[1:v][over]',
+      });
+    }
+    videoEdition
+      .complexFilter(complexFilter).aspect(TIKTOK_ASPECT_RATIO).duration(audioDuration)
       .on('end', () => resolve(outputFile))
       .on('error', reject)
       .save(outputFile);

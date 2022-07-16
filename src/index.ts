@@ -24,7 +24,7 @@ const main = async (): Promise<void> => {
     console.log('Generating audio...');
     const audioPath = await generateSpeech(compactString(wikiPage.extract));
     console.log('Generating video...');
-    const videoPath = await generateVideo({ audioPath });
+    const videoPath = await generateVideo({ audioPath, imagePath: wikiPage.imageUrl });
     console.log('Uploading video...');
     await uploadVideo(tiktokUserTokens.accessToken, tiktokUserTokens.userId, videoPath);
     console.log('Video uploaded');
