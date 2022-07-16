@@ -7,6 +7,8 @@ import {
   TMP_DIR,
   SPEECH_FILE,
   VIDEO_FILE,
+  TIKTOK_RESOLUTION,
+  TIKTOK_ASPECT_RATIO,
 } from './constants';
 
 
@@ -63,11 +65,9 @@ export const generateVideo = async ({
     ffmpeg()
       .input(videoAudio)
       .input(videoBase).inputOption(['-stream_loop -1'])
-      .complexFilter([
-        {
-          filter: 'amix', options: { duration: 'first', weights: '1 0' },
-        },
-      ]).size('1080x1920').aspect('9:16').duration(audioDuration)
+      .complexFilter({
+        filter: 'amix', options: { duration: 'first', weights: '1 0' },
+      }).size(TIKTOK_RESOLUTION).aspect(TIKTOK_ASPECT_RATIO).duration(audioDuration)
       .on('end', () => resolve(outputFile))
       .on('error', reject)
       .save(outputFile);
