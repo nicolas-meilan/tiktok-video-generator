@@ -32,7 +32,7 @@ export const generateSpeech = async (text: string, languageCode: string = DEFAUL
   return audioFile;
 };
 
-const getDurationOfMedia = (mediaPath: string): Promise<number> => new Promise((resolve, reject) => {
+export const getDurationOfMedia = (mediaPath: string): Promise<number> => new Promise((resolve, reject) => {
   ffmpeg.ffprobe(mediaPath, (err, metadata) => {
     if (err) {
       reject(err);
