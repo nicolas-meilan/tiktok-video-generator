@@ -23,6 +23,7 @@ import {
 
 const mocksConfigBase = {
   checkQRStatusSuccess: true,
+  errorOnCheckQR: false,
   keytarVoid: false,
 };
 
@@ -58,11 +59,15 @@ jest.mock('../api/tiktok', () => ({
     scanQR: 'scanQR',
     token: 'token',
   })),
-  checkQR: jest.fn(async () => ({
-    clientCode: 'clientCode',
-    clientTicket: 'clientTicket',
-    status: mocksConfig.checkQRStatusSuccess ? TIKTOK_QR_CONFIRMED : 'pending',
-  })),
+  checkQR: jest.fn(async () => {
+    if (mocksConfig.errorOnCheckQR) throw new Error('error');
+
+    return {
+      clientCode: 'clientCode',
+      clientTicket: 'clientTicket',
+      status: mocksConfig.checkQRStatusSuccess ? TIKTOK_QR_CONFIRMED : 'pending',
+    };
+  }),
   obtainUserTokens: jest.fn(async () => mockTiktokUserAuth),
   uploadVideo: jest.fn(async () => { }),
   revokeTokens: jest.fn(async () => { }),
@@ -73,6 +78,7 @@ const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms
 describe('tiktok manager tests', () => {
   beforeEach(() => {
     mocksConfig.checkQRStatusSuccess = mocksConfigBase.checkQRStatusSuccess;
+    mocksConfig.errorOnCheckQR = mocksConfigBase.errorOnCheckQR;
     mocksConfig.keytarVoid = mocksConfigBase.keytarVoid;
     jest.clearAllMocks();
   });
@@ -95,6 +101,20 @@ describe('tiktok manager tests', () => {
     mocksConfig.checkQRStatusSuccess = true;
     await sleep(TIKTOK_QR_POLLING_TIME); // wait until loginWithQR finish the loop
     expect(obtainUserTokens).toHaveBeenCalled();
+  });
+
+  it('loginWithQR error checking qr', (done) => {
+    mocksConfig.checkQRStatusSuccess = false;
+    loginWithQR().catch((error) => {
+      expect(getQR).toBeCalledTimes(1);
+      expect(checkQR).toHaveBeenCalled();
+      expect(obtainUserTokens).not.toHaveBeenCalled();
+      expect(error.message).toMatch('error');
+      done();
+    });
+    sleep(100).then(() => {
+      mocksConfig.errorOnCheckQR = true;
+    });
   });
 
   it('logout', async () => {
