@@ -29,6 +29,8 @@ const VIDEO_URL = 'share/video/';
 
 const tiktokAuthHttp = axios.create();
 
+const FORM_DATA_CONTENT_TYPE = 'multipart/form-data';
+
 const changeAccessTokenFromUrl = (url: string, accessToken: string): string => {
   const accessTokenParamRegex = /access_token=.+/;
   const accessTokenParamRegexWithAnd = /access_token=.+&/;
@@ -76,6 +78,15 @@ const onTiktokRequestError = async (error: AxiosError) => {
 
   const originalRequest = error.config;
   originalRequest.url = changeAccessTokenFromUrl(originalRequest.url!, accessToken);
+
+  if (originalRequest.headers?.['Content-Type'] === FORM_DATA_CONTENT_TYPE) {
+    const { videoPath } = originalRequest.params;
+    const data = new FormData();
+    data.append('video', fs.createReadStream(videoPath));
+    originalRequest.data = data;
+  }
+
+  return axios(originalRequest);
 };
 
 tiktokAuthHttp.interceptors.response.use((response) => response, onTiktokRequestError);
@@ -137,8 +148,7 @@ export const uploadVideo = async (accessToken: string, userId: string, videoPath
 
   await tiktokAuthHttp.post(
     uploadVideoUrl, body, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+      params: { videoPath }, // send a param to the interceptor
+      headers: { 'Content-Type': FORM_DATA_CONTENT_TYPE },
     });
 };
