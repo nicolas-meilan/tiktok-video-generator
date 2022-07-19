@@ -150,5 +150,7 @@ export const uploadVideo = async (accessToken: string, userId: string, videoPath
     uploadVideoUrl, body, {
       params: { videoPath }, // send a param to the interceptor
       headers: { 'Content-Type': FORM_DATA_CONTENT_TYPE },
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
     });
 };

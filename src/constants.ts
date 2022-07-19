@@ -10,5 +10,6 @@ export const ACCOUNT_STORAGE = 'tiktok';
 export const ACCESS_TOKEN_STORAGE_KEY = 'accessToken';
 export const REFRESH_TOKEN_STORAGE_KEY = 'refreshToken';
 export const USER_ID_STORAGE_KEY = 'userId';
+export const PREVIOUS_ARTICLE_URL_STORAGE_KEY = 'prevArticle';
 
 export const TIKTOK_ASPECT_RATIO = '9:16';
