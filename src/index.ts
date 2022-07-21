@@ -25,7 +25,7 @@ const generateAndUploadNews = async (): Promise<void> => {
     console.log('Generating audio...');
     const audioPath = await generateSpeech(compactString(latestNew.article));
     console.log('Generating video...');
-    const videoPath = await generateVideo({ audioPath, imagePath: latestNew.imageUrl });
+    const videoPath = await generateVideo({ audioPath, imagePath: latestNew.imageUrl, imageIsUrl: true });
     console.log('Uploading video...');
     await uploadVideo(tiktokUserTokens.accessToken, tiktokUserTokens.userId, videoPath);
     console.log('Video uploaded');
@@ -50,7 +50,7 @@ const generateAndUploadWikipedia = async (): Promise<void> => {
     console.log('Generating audio...');
     const audioPath = await generateSpeech(compactString(wikiPage.extract));
     console.log('Generating video...');
-    const videoPath = await generateVideo({ audioPath, imagePath: wikiPage.imageUrl });
+    const videoPath = await generateVideo({ audioPath, imagePath: wikiPage.imageUrl, imageIsUrl: true });
     console.log('Uploading video...');
     await uploadVideo(tiktokUserTokens.accessToken, tiktokUserTokens.userId, videoPath);
     console.log('Video uploaded');

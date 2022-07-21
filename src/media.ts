@@ -24,7 +24,7 @@ export const generateSpeech = async (text: string, languageCode: string = DEFAUL
     voice: { languageCode },
     audioConfig: {
       audioEncoding: protos.google.cloud.texttospeech.v1.AudioEncoding.MP3,
-      speakingRate: 1.3,
+      speakingRate: 1.15,
     },
   };
 
