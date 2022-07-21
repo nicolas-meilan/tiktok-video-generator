@@ -3,6 +3,7 @@ import fs from 'fs';
 import googleTextToSpeech, { protos } from '@google-cloud/text-to-speech';
 import ffmpeg from 'fluent-ffmpeg';
 
+import { downloadImage } from './api/common';
 import {
   TMP_DIR,
   SPEECH_FILE,
@@ -21,7 +22,10 @@ export const generateSpeech = async (text: string, languageCode: string = DEFAUL
   const ttsRequest = {
     input: { text },
     voice: { languageCode },
-    audioConfig: { audioEncoding: protos.google.cloud.texttospeech.v1.AudioEncoding.MP3 },
+    audioConfig: {
+      audioEncoding: protos.google.cloud.texttospeech.v1.AudioEncoding.MP3,
+      speakingRate: 1.3,
+    },
   };
 
   const [response] = await ttsClient.synthesizeSpeech(ttsRequest);
@@ -46,10 +50,12 @@ export const generateVideo = async ({
   videoPath,
   audioPath,
   imagePath,
+  imageIsUrl,
 }: {
   videoPath?: string;
   audioPath?: string;
   imagePath?: string;
+  imageIsUrl?: boolean;
 } = {}): Promise<string> => {
   const overImageHeight = 600;
   const videoBase = videoPath || DEFAULT_VIDEO_PATH;
@@ -67,12 +73,13 @@ export const generateVideo = async ({
     filter: 'amix', options: { duration: 'first', weights: '1 0' },
   }];
 
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const videoEdition = ffmpeg()
       .input(videoAudio)
       .input(videoBase).inputOption(['-stream_loop -1']);
     if (imagePath) {
-      videoEdition.input(imagePath);
+      const imageInput = imageIsUrl ? await downloadImage(imagePath) : imagePath;
+      videoEdition.input(imageInput);
       complexFilter.push({
         filter: 'scale',
         options: {
@@ -91,7 +98,10 @@ export const generateVideo = async ({
       });
     }
     videoEdition
-      .complexFilter(complexFilter).aspect(TIKTOK_ASPECT_RATIO).duration(audioDuration)
+      .complexFilter(complexFilter)
+      .aspect(TIKTOK_ASPECT_RATIO)
+      .duration(audioDuration)
+      .videoCodec('libx265')
       .on('end', () => resolve(outputFile))
       .on('error', reject)
       .save(outputFile);

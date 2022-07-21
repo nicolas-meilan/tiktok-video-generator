@@ -20,7 +20,7 @@ const generateAndUploadNews = async (): Promise<void> => {
       : await loginWithQR();
   
   
-    console.log('Logged in\nSearching random definition from wikipedia...');
+    console.log('Logged in\nSearching news...');
     const latestNew = await getLatestArticle();
     console.log('Generating audio...');
     const audioPath = await generateSpeech(compactString(latestNew.article));

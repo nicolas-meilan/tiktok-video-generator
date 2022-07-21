@@ -12,7 +12,7 @@ type ArticleResponse = {
 };
 
 export const getLatestNew = async (about: string): Promise<ArticleResponse> => {
-  const response = await axios.get(`${BASE_URL}everything?apiKey=${NEWS_API_KEY}&q=${about}&language=es&sortBy=publishedAt&pageSize=1`);
+  const response = await axios.get(`${BASE_URL}everything?apiKey=${NEWS_API_KEY}&q=${about}&searchIn=title,description&language=es&sortBy=publishedAt&pageSize=1`);
 
   const latest = response.data.articles[0];
 

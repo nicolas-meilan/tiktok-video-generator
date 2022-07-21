@@ -10,8 +10,8 @@ import {
   formatStringFromRedeableHtml,
 } from './utils/formatter';
 
-const NEWS_ABOUT = 'crypto';
-const MAX_CHARS = 1000;
+const NEWS_ABOUT = 'ethereum%20OR%20crypto%20OR%20bitcoin%20OR%20ETH%20OR%20BTC%20OR%20coin';
+const MAX_CHARS = 800;
 const MAX_DIFF_ALLOWED = 100;
 
 type Article = {
@@ -39,7 +39,7 @@ export const getLatestArticle = async (): Promise<Article> => {
     maxLength: MAX_CHARS,
     diffAllowed: MAX_DIFF_ALLOWED,
   }));
-  
+
   const articleWithTitle = `${response.title}.${articleFormatted}`;
 
   storage.setItem(PREVIOUS_ARTICLE_URL_STORAGE_KEY, response.articleUrl);

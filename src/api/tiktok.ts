@@ -141,16 +141,16 @@ export const checkQR = async (token: string): Promise<TiktokStatusQR> => {
 // Video endpoint
 
 export const uploadVideo = async (accessToken: string, userId: string, videoPath: string): Promise<void> => {
-  const uploadVideoUrl = `${BASE_URL}${VIDEO_URL}upload/?access_token=${accessToken}&open_id=${userId}`;
+  const url = `${BASE_URL}${VIDEO_URL}upload/?access_token=${accessToken}&open_id=${userId}`;
 
-  const body = new FormData();
-  body.append('video', fs.createReadStream(videoPath));
+  const data = new FormData();
+  data.append('video', fs.createReadStream(videoPath));
 
-  await tiktokAuthHttp.post(
-    uploadVideoUrl, body, {
-      params: { videoPath }, // send a param to the interceptor
-      headers: { 'Content-Type': FORM_DATA_CONTENT_TYPE },
-      maxContentLength: Infinity,
-      maxBodyLength: Infinity,
-    });
+  await tiktokAuthHttp({
+    url,
+    method: 'post',
+    headers: { 'Content-Type': FORM_DATA_CONTENT_TYPE },
+    data,
+    params: { videoPath }, // send a param to the interceptor
+  });
 };
