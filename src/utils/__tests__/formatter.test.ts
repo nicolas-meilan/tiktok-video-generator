@@ -2,8 +2,8 @@ import { compactString } from '../formatter';
 
 describe('formatter tests', () => {
   it('compactString', () => {
-    const strToCompact = 'Hola, coma y espacio. punto y espacio, punto final.';
-    const strResult = 'Hola,coma y espacio.punto y espacio,punto final';
+    const strToCompact = 'Hola, coma y espacio. punto y espacio, punto final "hola" -guion-.';
+    const strResult = 'Hola,coma y espacio.punto y espacio,punto final hola guion';
     expect(compactString(strToCompact)).toMatch(strResult);
   });
 

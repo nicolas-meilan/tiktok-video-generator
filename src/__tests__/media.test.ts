@@ -32,6 +32,10 @@ jest.mock('../constants', () => ({
   TMP_DIR: './assets/__mocks__',
 }));
 
+jest.mock('../api/common', () => ({
+  downloadImage: jest.fn(),
+}));
+
 jest.mock('@google-cloud/text-to-speech', () => {
   class TextToSpeechClient {
     synthesizeSpeech = async () => [{
@@ -76,10 +80,23 @@ describe('media tests', () => {
     const videoPath = await generateVideo({
       audioPath: `${TMP_DIR}/mockSpeech.mp3`,
       videoPath: './assets/videoBase.mp4',
-      imagePath: `${TMP_DIR}/wikipediaImage.jpeg`,
+      imagePath: `${TMP_DIR}/image.jpeg`,
     });
 
     const mockedStream = fs.readFileSync(`${TMP_DIR}/videoWithImage.mp4`);
+    const resultStream = fs.readFileSync(videoPath);
+    expect(mockedStream.toString()).toMatch(resultStream.toString());
+  });
+
+  it('generateVideo with image url', async () => {
+    const videoPath = await generateVideo({
+      audioPath: `${TMP_DIR}/mockSpeech.mp3`,
+      videoPath: './assets/videoBase.mp4',
+      imagePath: '',
+      imageIsUrl: true,
+    });
+
+    const mockedStream = fs.readFileSync(`${TMP_DIR}/videoWithoutImage.mp4`);
     const resultStream = fs.readFileSync(videoPath);
     expect(mockedStream.toString()).toMatch(resultStream.toString());
   });
@@ -89,7 +106,7 @@ describe('media tests', () => {
     const videoPath = await generateVideo({
       audioPath: `${TMP_DIR}/mockSpeech.mp3`,
       videoPath: './assets/videoBase.mp4',
-      imagePath: `${TMP_DIR}/wikipediaImage.jpeg`,
+      imagePath: `${TMP_DIR}/image.jpeg`,
     });
 
     const mockedStream = fs.readFileSync(`${TMP_DIR}/videoWithImage.mp4`);
