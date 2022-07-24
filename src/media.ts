@@ -102,6 +102,7 @@ export const generateVideo = async ({
       .aspect(TIKTOK_ASPECT_RATIO)
       .duration(audioDuration)
       .videoCodec('libx265')
+      .videoBitrate(1024)
       .on('end', () => resolve(outputFile))
       .on('error', reject)
       .save(outputFile);
