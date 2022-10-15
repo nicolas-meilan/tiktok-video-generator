@@ -15,6 +15,7 @@ import {
 const DEFAULT_LANGUAGE_CODE = 'es';
 
 const DEFAULT_VIDEO_PATH = './assets/videoBase.mp4';
+const TALKLING_IMAGE_PATH = './assets/talking.gif';
 
 const ttsClient = new googleTextToSpeech.TextToSpeechClient();
 
@@ -69,14 +70,36 @@ export const generateVideo = async ({
   }
 
   const outputFile = `${TMP_DIR}/${VIDEO_FILE}`;
-  const complexFilter : ffmpeg.FilterSpecification[] = [{
-    filter: 'amix', options: { duration: 'first', weights: '1 0' },
+  const complexFilter: ffmpeg.FilterSpecification[] = [{
+    filter: 'amix',
+    options: {
+      duration: 'first',
+      weights: '1 0',
+    },
+  }, {
+    filter: 'scale',
+    options: {
+      width: 75,
+      height: 70.5,
+    },
+    outputs: '[talkingGif]',
+    inputs: '[2:v]',
+  }, {
+    filter: 'overlay',
+    options: {
+      x: 540,
+      y: 930,
+    },
+    inputs: '[1:v][talkingGif]',
+    ...(imagePath ? { outputs: '[talkingVideo]' } : {}),
   }];
 
   return new Promise(async (resolve, reject) => {
     const videoEdition = ffmpeg()
       .input(videoAudio)
-      .input(videoBase).inputOption(['-stream_loop -1']);
+      .input(videoBase).inputOption(['-stream_loop -1'])
+      .input(TALKLING_IMAGE_PATH).inputOption(['-stream_loop -1']);
+
     if (imagePath) {
       const imageInput = imageIsUrl ? await downloadImage(imagePath) : imagePath;
       videoEdition.input(imageInput);
@@ -86,17 +109,18 @@ export const generateVideo = async ({
           width: 'min(-1, iw)',
           height: overImageHeight,
         },
-        outputs: '[over]',
-        inputs: '[2:v]',
+        outputs: '[overImage]',
+        inputs: '[3:v]',
       }, {
         filter: 'overlay',
         options: {
           x: '(main_w-overlay_w)/2',
           y: 8,
         },
-        inputs: '[1:v][over]',
+        inputs: '[talkingVideo][overImage]',
       });
     }
+
     videoEdition
       .complexFilter(complexFilter)
       .aspect(TIKTOK_ASPECT_RATIO)

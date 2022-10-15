@@ -1,4 +1,5 @@
 import fs from 'fs';
+import https from 'https';
 
 import axios, { AxiosError } from 'axios';
 import FormData from 'form-data';
@@ -27,7 +28,9 @@ const QR_URL = 'v0/oauth/';
 
 const VIDEO_URL = 'share/video/';
 
-const tiktokAuthHttp = axios.create();
+const tiktokAuthHttp = axios.create({
+  httpsAgent: new https.Agent({ keepAlive: true }),
+});
 
 const FORM_DATA_CONTENT_TYPE = 'multipart/form-data';
 
@@ -149,7 +152,7 @@ export const uploadVideo = async (accessToken: string, userId: string, videoPath
   await tiktokAuthHttp({
     url,
     method: 'post',
-    headers: { 'Content-Type': FORM_DATA_CONTENT_TYPE },
+    headers: data.getHeaders(),
     data,
     params: { videoPath }, // send a param to the interceptor
   });
