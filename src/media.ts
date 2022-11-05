@@ -8,7 +8,7 @@ import {
   TMP_DIR,
   SPEECH_FILE,
   VIDEO_FILE,
-  TIKTOK_ASPECT_RATIO,
+  TIKTOK_VIDEO_CONFIG,
 } from './constants';
 
 
@@ -79,19 +79,34 @@ export const generateVideo = async ({
   }, {
     filter: 'scale',
     options: {
+      width: TIKTOK_VIDEO_CONFIG.WIDTH,
+      height: TIKTOK_VIDEO_CONFIG.HEIGHT,
+    },
+    inputs: '[1:v]',
+    outputs: '[scaledVideo]',
+  }, {
+    filter: 'framerate',
+    options: {
+      fps: TIKTOK_VIDEO_CONFIG.FPS,
+    },
+    inputs: '[scaledVideo]',
+    outputs: '[fpsLimitedVideo]',
+  }, {
+    filter: 'scale',
+    options: {
       width: 75,
       height: 70.5,
     },
-    outputs: '[talkingGif]',
     inputs: '[2:v]',
+    outputs: '[talkingGif]',
   }, {
     filter: 'overlay',
     options: {
       x: 540,
       y: 930,
     },
-    inputs: '[1:v][talkingGif]',
-    ...(imagePath ? { outputs: '[talkingVideo]' } : {}),
+    inputs: '[fpsLimitedVideo][talkingGif]',
+    ...(imagePath ? { outputs: '[finalVideo]' } : {}),
   }];
 
   return new Promise(async (resolve, reject) => {
@@ -109,21 +124,21 @@ export const generateVideo = async ({
           width: 'min(-1, iw)',
           height: overImageHeight,
         },
-        outputs: '[overImage]',
         inputs: '[3:v]',
+        outputs: '[overImage]',
       }, {
         filter: 'overlay',
         options: {
           x: '(main_w-overlay_w)/2',
           y: 8,
         },
-        inputs: '[talkingVideo][overImage]',
+        inputs: '[finalVideo][overImage]',
       });
     }
 
     videoEdition
       .complexFilter(complexFilter)
-      .aspect(TIKTOK_ASPECT_RATIO)
+      .aspect(TIKTOK_VIDEO_CONFIG.ASPECT_RATIO)
       .duration(audioDuration)
       .videoCodec('libx265')
       .videoBitrate(1024)

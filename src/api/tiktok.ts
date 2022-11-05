@@ -152,6 +152,7 @@ export const uploadVideo = async (accessToken: string, userId: string, videoPath
   await tiktokAuthHttp({
     url,
     method: 'post',
+    proxy: false,
     headers: data.getHeaders(),
     data,
     params: { videoPath }, // send a param to the interceptor

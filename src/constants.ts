@@ -12,4 +12,9 @@ export const REFRESH_TOKEN_STORAGE_KEY = 'refreshToken';
 export const USER_ID_STORAGE_KEY = 'userId';
 export const PREVIOUS_ARTICLE_URL_STORAGE_KEY = 'prevArticle';
 
-export const TIKTOK_ASPECT_RATIO = '9:16';
+export const TIKTOK_VIDEO_CONFIG = {
+  FPS: 60,
+  ASPECT_RATIO: '9:16',
+  WIDTH: 1080,
+  HEIGHT: 1920,
+};
