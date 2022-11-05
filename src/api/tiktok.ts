@@ -82,10 +82,17 @@ const onTiktokRequestError = async (error: AxiosError) => {
   const originalRequest = error.config;
   originalRequest.url = changeAccessTokenFromUrl(originalRequest.url!, accessToken);
 
-  if (originalRequest.headers?.['Content-Type'] === FORM_DATA_CONTENT_TYPE) {
-    const { videoPath } = originalRequest.params;
+  const requestParams = originalRequest.params;
+  if (requestParams && originalRequest.headers?.['Content-Type'] === FORM_DATA_CONTENT_TYPE) {
     const data = new FormData();
-    data.append('video', fs.createReadStream(videoPath));
+
+    Object.keys(requestParams).forEach((key) => {
+      const content = requestParams[key].isPath
+        ? fs.createReadStream(requestParams[key].content)
+        : requestParams[key].content;
+      data.append(key, fs.createReadStream(content));
+    });
+
     originalRequest.data = data;
   }
 
@@ -149,12 +156,19 @@ export const uploadVideo = async (accessToken: string, userId: string, videoPath
   const data = new FormData();
   data.append('video', fs.createReadStream(videoPath));
 
-  await tiktokAuthHttp({
+  await tiktokAuthHttp.post(
     url,
-    method: 'post',
-    proxy: false,
-    headers: data.getHeaders(),
     data,
-    params: { videoPath }, // send a param to the interceptor
-  });
+    {
+      proxy: false,
+      headers: {
+        ...data.getHeaders(),
+        'Content-Type': FORM_DATA_CONTENT_TYPE,
+      },
+      params: { video: {
+        content: videoPath,
+        isPath: true,
+      } }, // send params to the interceptor
+    },
+  );
 };
